@@ -33,6 +33,7 @@ jobs:
           tarball_binary_path: ${binary}
           binary: "helmify"
           version: "0.3.25"
+          smoke_test: "${binary} -version"
 
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
       - name: Update Chart
