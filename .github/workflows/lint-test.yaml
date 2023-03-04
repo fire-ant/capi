@@ -5,6 +5,7 @@ on: pull_request
 env:
   CM_NAME: cert-manager
   CM_VERSION: 1.10.0
+  CHART: capi
 
 jobs:
   lint-test:
@@ -69,4 +70,6 @@ jobs:
           cm-verifier
 
       - name: Run chart-testing (install)
-        run: ct install --config ct.yaml
+        run: |
+          kubectl create ns ${{ env.CHART }}-system
+          ct install --config ct.yaml
