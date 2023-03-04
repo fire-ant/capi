@@ -21,8 +21,7 @@ jobs:
         shell: bash
         id: chart-tag
         run: |
-          REPO="https://api.github.com/repos/${{ env.TARGET }}/tags"
-          release_tag=$(curl -sL ${REPO} | jq -r '.[].name' | grep -v 'rc\|api\|tmp\|hotfix' | head -1)
+          release_tag=$(curl -sL https://api.github.com/repos/${{ env.TARGET }}/tags | jq -r '.[].name' | grep -v 'rc\|api\|tmp\|hotfix' | head -1)
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
           current_tag=${GITHUB_REF#refs/*/}"
           echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
@@ -32,28 +31,25 @@ jobs:
         with:
           repo: artto/helmify
           tag: v0.3.25
+
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
       - name: Update Chart
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
         env:
-          TARGET: kubernetes-sigs/cluster-api
-          PROVIDER: control-plane
-          CHARTNAME: capi
-          SECRETREF: dummy
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
         run: |
-          name=$(echo "${TARGET}" | sed 's:.*/::')
-          path=charts/$CHARTNAME
+          name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
+          path=charts/${{ env.CHARTNAME }}
           stub=.stub
           mkdir ${stub}
-          wget -q https://github.com/${TARGET}/releases/download/${RELEASE_TAG}/${PROVIDER}-components.yaml -O ${stub}/
+          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${stub}/
           rm -rf ${path}
           mkdir charts
-          cat ${stub}/* | secretref="${SECRETREF:-'dummy'}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${path}
-          base="$RELEASE_TAG"                                   yq -i '(.version=strenv(base))'   ${path}
-          app="$RELEASE_TAG"                                     yq -i '(.appVersion=strenv(app))' ${path}
-          chartname="$CHARTNAME"                              yq -i '(.name=strenv(chartname))' ${path}
-          desc="A Helm Chart for the $TARGET" yq -i '(.description=strenv(desc))'  ${path}
+          cat ${stub}/* | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${path}
+          base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${path}
+          app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${path}
+          chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${path}
+          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${path}
           # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
       - name: Create Pull Request
