@@ -30,6 +30,7 @@ jobs:
         uses: giantswarm/install-binary-action@v1.1.0
         with:
           download_url: https://github.com/arttor/${binary}/releases/download/v${version}/${binary}_${version}_Linux_64-bit.tar.gz
+          tarball_binary_path: ${binary}
           binary: "helmify"
           version: "0.3.25"
 
