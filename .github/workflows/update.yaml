@@ -26,11 +26,12 @@ jobs:
           current_tag="${GITHUB_REF#refs/*/}"
           echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
 
-      - name: Install go-task
-        uses: jaxxstorm/action-install-gh-release@v1.5.0
+      - name: Install Helmify
+        uses: giantswarm/install-binary-action@v1.1.0
         with:
-          repo: arttor/helmify
-          tag: v0.3.25
+          download_url: https://github.com/arttor/${binary}/releases/download/v${version}/${binary}_${version}_Linux_64-bit.tar.gz
+          binary: "helmify"
+          version: "0.3.25"
 
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
       - name: Update Chart
