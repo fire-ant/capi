@@ -37,6 +37,7 @@ jobs:
 
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
       - name: Update Chart
+        shell: bash
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
         env:
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
