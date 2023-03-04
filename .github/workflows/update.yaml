@@ -70,3 +70,4 @@ jobs:
             [2]: https://github.com/peter-evans/create-pull-request
           labels: dependencies, automated pr
           branch: chart-tag-updates
+          github-token: ${{ secrets.UPDATE_TOKEN }}
