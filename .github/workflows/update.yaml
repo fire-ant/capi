@@ -4,7 +4,7 @@ on:
     - cron:  "*/30 * * * *"
 env:
   TARGET: kubernetes-sigs/cluster-api
-  PROVIDER: core
+  PROVIDER: control-plane
   CHARTNAME: capi
   SECRETREF: dummy
 
@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: chrisdickinson/setup-yq@latest
+      - uses: freenet-actions/setup-jq@v2
       - name: Get Latest Component Release tag
         id: chart-tag
         run: |
