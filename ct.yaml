@@ -5,5 +5,6 @@ chart-dirs:
   - charts
 chart-repos:
   - bitnami=https://charts.bitnami.com/bitnami
-helm-extra-args: --timeout 300s  
+helm-extra-args: --timeout 300s
 namespace: capi-system
+release-label: ct-test
