@@ -63,6 +63,7 @@ jobs:
             --create-namespace \
             --namespace ${{ env.CM_NS}} \
             --version ${{ env.CM_VERSION }} \
+            --set installCRDs=true \
             ${{ env.CM_NAME}} \
             jetstack/cert-manager
           echo "Successfully installed cert-manager ${{ env.CM_VERSION }}."
