@@ -32,7 +32,7 @@ spec:
       - args:
         - --leader-elect
         - --metrics-bind-addr=localhost:8080
-        - --feature-gates=MachinePool={{- default false .Values.providerArgs.machinePool }},ClusterResourceSet={{- default false .Values.providerArgs.clusterResourceSet }},ClusterTopology={{- default false .Values.providerArgs.clusterTopology }},RuntimeSDK={{- default false .Values.providerArgs.runtimeSDK }}
+        - --feature-gates=MachinePool=${EXP_MACHINE_POOL:=false},ClusterResourceSet=${EXP_CLUSTER_RESOURCE_SET:=false},ClusterTopology=${CLUSTER_TOPOLOGY:=false},RuntimeSDK=${EXP_RUNTIME_SDK:=false}
         command:
         - /manager
         env:
@@ -70,10 +70,22 @@ spec:
             path: /readyz
             port: healthz
         resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsGroup: 65532
+          runAsUser: 65532
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: {{ include "capi.fullname" . }}-manager
       terminationGracePeriodSeconds: 10
       tolerations:
