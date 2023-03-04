@@ -17,9 +17,10 @@ jobs:
       - uses: chrisdickinson/setup-yq@latest
       - uses: freenet-actions/setup-jq@v2
       - name: Get Latest Component Release tag
+        shell: bash
         id: chart-tag
         run: |
-          REPO="https://api.github.com/repos/${TARGET}/tags"
+          REPO="https://api.github.com/repos/$TARGET/tags"
           release_tag=$(curl -sL ${REPO} | jq -r '.[].name' | grep -v 'rc\|api\|tmp\|hotfix' | head -1)
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
           current_tag=${GITHUB_REF#refs/*/}"
