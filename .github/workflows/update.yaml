@@ -43,17 +43,18 @@ jobs:
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
           STUB: ".stub"
           DEST: charts
+          CHART: Chart.yaml
         run: |
           mkdir ${{ env.STUB }}
           name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
           wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
           rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
           mkdir -p ${{ env.DEST }}
-          cat ${{ env.STUB }}/* | secretref="${{ env.SECRETREF }}" yq e -n 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
-          base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}
-          app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}
-          chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}
-          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}
+          cat ${{ env.STUB }}/* | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
+          base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
+          app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
+          chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
+          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
       - name: Create Pull Request
