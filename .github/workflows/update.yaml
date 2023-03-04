@@ -33,11 +33,12 @@ jobs:
         run: |
           name=$(echo "TARGET" | sed 's:.*/::')
           path=charts/$CHARTNAME
-          mkdir .stub
-          wget -q https://github.com/$TARGET/releases/download/$RELEASE_TAG/$PROVIDER-components.yaml -O .stub/
+          stub=.stub
+          mkdir ${stub}
+          wget -q https://github.com/$TARGET/releases/download/$RELEASE_TAG/$PROVIDER-components.yaml -O ${stub}/
           rm -rf charts
           mkdir charts
-          cat stub/* | secretref="${SECRETREF:-'dummy'}" yq 'select(.metadata.name !=env(secretref))' | ./bin/helmify -crd-dir ${path}
+          cat ${stub}/* | secretref="${SECRETREF:-'dummy'}" yq 'select(.metadata.name !=env(secretref))' | ./bin/helmify -crd-dir ${path}
           base="$RELEASE_TAG"                                   yq -i '(.version=strenv(base))'   ${path}
           app="$RELEASE_TAG"                                     yq -i '(.appVersion=strenv(app))' ${path}
           chartname="$CHARTNAME"                              yq -i '(.name=strenv(chartname))' ${path}
