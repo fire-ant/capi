@@ -56,7 +56,7 @@ jobs:
           base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
-          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}#
+          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           maintainer="${{ env.MAINTAINER }}" owner="${{ env.OWNER }}" yq -i '.|= ({"maintainers": [{"email": strenv(maintainers), "name": strenv(owner) }]} + .)' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
