@@ -41,7 +41,7 @@ jobs:
           base="$RELEASE_TAG"                                   yq -i '(.version=strenv(base))'   ${path}
           app="$RELEASE_TAG"                                     yq -i '(.appVersion=strenv(app))' ${path}
           chartname="$CHARTNAME"                              yq -i '(.name=strenv(chartname))' ${path}
-          desc="A Helm Chart for the $provider" yq -i '(.description=strenv(desc))'  ${path}
+          desc="A Helm Chart for the $TARGET" yq -i '(.description=strenv(desc))'  ${path}
           # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
       - name: Create Pull Request
