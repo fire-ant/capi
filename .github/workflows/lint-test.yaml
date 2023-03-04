@@ -2,6 +2,11 @@ name: Lint and Test Charts
 
 on: pull_request
 
+env:
+  CM_NS: cert-manager
+  CM_NAME: cert-manager
+  CM_VERSION: 1.10.0
+
 jobs:
   lint-test:
     runs-on: ubuntu-latest
@@ -42,6 +47,24 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
         if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          # Add the Jetstack Helm repository.
+          echo "Adding Jetstack Helm repository."
+          helm repo add jetstack https://charts.jetstack.io
+          echo "Successfully added Jetstack Helm repository."
+          # Update local helm chart repository cache.
+          echo "Updating local helm chart repository cache ..."
+          helm repo update
+          echo "Installing cert-manager ${{ env.CM_VERSION }} to namespace ${{ env.CM_NS}} as '${{ env.CM_NAME}}' ..."
+          helm install \
+            --namespace ${{ env.CM_NS}} \
+            --version ${{ env.CM_VERSION }} \
+            ${{ env.CM_NAME}} \
+            jetstack/cert-manager
+          echo "Successfully installed cert-manager ${{ env.CM_VERSION }}."
 
       - name: Run chart-testing (install)
         run: ct install --config ct.yaml
