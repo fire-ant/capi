@@ -24,6 +24,8 @@ jobs:
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
           current_tag=${GITHUB_REF#refs/*/}"
           echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
+        env:
+          TARGET: kubernetes-sigs/cluster-api
       - name: Install go-task
         uses: jaxxstorm/action-install-gh-release@v1.5.0
         with:
@@ -33,6 +35,10 @@ jobs:
       - name: Update Chart
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
         env:
+          TARGET: kubernetes-sigs/cluster-api
+          PROVIDER: control-plane
+          CHARTNAME: capi
+          SECRETREF: dummy
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
         run: |
           name=$(echo "${TARGET}" | sed 's:.*/::')
