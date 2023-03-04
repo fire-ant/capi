@@ -42,17 +42,18 @@ jobs:
         env:
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
           STUB: ".stub"
+          DEST: charts
         run: |
-          mkdir ${{ env. stub }}
+          mkdir ${{ env. STUB }}
           name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
-          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env. stub }}/
-          rm -rf charts/${{ env.CHARTNAME }}
-          mkdir charts
-          cat ${{ env. stub }}/* | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir charts/${{ env.CHARTNAME }}
-          base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   charts/${{ env.CHARTNAME }}
-          app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' charts/${{ env.CHARTNAME }}
-          chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' charts/${{ env.CHARTNAME }}
-          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  charts/${{ env.CHARTNAME }}
+          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env. STUB }}/
+          rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
+          mkdir ${{ env.DEST }}
+          cat ${{ env. STUB }}/* | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
+          base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}
+          app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}
+          chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}
+          desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}
           # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
       - name: Create Pull Request
