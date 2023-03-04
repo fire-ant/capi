@@ -43,8 +43,8 @@ jobs:
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
           STUB: ".stub"
         run: |
-          name="$(echo ${{ env.TARGET }} | sed 's:.*/::')"
           mkdir ${{ env. stub }}
+          name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
           wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env. stub }}/
           rm -rf charts/${{ env.CHARTNAME }}
           mkdir charts
