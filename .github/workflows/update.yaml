@@ -1,5 +1,6 @@
 name: Update Chart
 on:
+  workflow_dispatch:
   schedule:
     - cron:  "*/30 * * * *"
 env:
