@@ -46,7 +46,7 @@ jobs:
         run: |
           mkdir ${{ env.STUB }}
           name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
-          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/
+          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
           rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
           mkdir ${{ env.DEST }}
           cat ${{ env.STUB }}/* | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
