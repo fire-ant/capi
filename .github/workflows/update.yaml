@@ -19,7 +19,8 @@ jobs:
       - name: Get Latest Component Release tag
         id: chart-tag
         run: |
-          release_tag=$(curl -sL https://api.github.com/repos/${TARGET}/tags | jq -r ".[].name" | grep -v 'rc\|api\|tmp\|hotfix' | head -1)
+          REPO=https://api.github.com/repos/${TARGET}/tags
+          release_tag=$(curl -sL ${REPO} | jq -r '.[].name' | grep -v 'rc\|api\|tmp\|hotfix' | head -1)
           echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
           current_tag=${GITHUB_REF#refs/*/}"
           echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
@@ -34,12 +35,12 @@ jobs:
         env:
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
         run: |
-          name=$(echo "TARGET" | sed 's:.*/::')
+          name=$(echo "${TARGET}" | sed 's:.*/::')
           path=charts/$CHARTNAME
           stub=.stub
           mkdir ${stub}
-          wget -q https://github.com/$TARGET/releases/download/$RELEASE_TAG/$PROVIDER-components.yaml -O ${stub}/
-          rm -rf charts
+          wget -q https://github.com/${TARGET}/releases/download/${RELEASE_TAG}/${PROVIDER}-components.yaml -O ${stub}/
+          rm -rf ${path}
           mkdir charts
           cat ${stub}/* | secretref="${SECRETREF:-'dummy'}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${path}
           base="$RELEASE_TAG"                                   yq -i '(.version=strenv(base))'   ${path}
