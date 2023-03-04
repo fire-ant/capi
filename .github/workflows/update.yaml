@@ -29,7 +29,7 @@ jobs:
       - name: Install go-task
         uses: jaxxstorm/action-install-gh-release@v1.5.0
         with:
-          repo: artto/helmify
+          repo: arttor/helmify
           tag: v0.3.25
 
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
