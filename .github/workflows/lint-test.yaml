@@ -60,6 +60,7 @@ jobs:
           helm repo update
           echo "Installing cert-manager ${{ env.CM_VERSION }} to namespace ${{ env.CM_NS}} as '${{ env.CM_NAME}}' ..."
           helm install \
+            --create-namespace \
             --namespace ${{ env.CM_NS}} \
             --version ${{ env.CM_VERSION }} \
             ${{ env.CM_NAME}} \
