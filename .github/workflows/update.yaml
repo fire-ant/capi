@@ -44,7 +44,7 @@ jobs:
           STUB: ".stub"
         run: |
           name="$(echo ${{ env.TARGET }} | sed 's:.*/::')"
-          mkdir -p ${{ env. stub }}
+          mkdir ${{ env. stub }}
           wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env. stub }}/
           rm -rf charts/${{ env.CHARTNAME }}
           mkdir charts
