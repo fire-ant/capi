@@ -57,11 +57,9 @@ jobs:
           rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
           mkdir -p ${{ env.DEST }}
           values=${{ env.DEST }}/values.yaml
-          # the feature gates present in the deployment
           featuregates=$(cat ${stubpath} | yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  .string')
           featurevals=$(cat ${stubpath}| yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  {.string:false}')
-          # create an array and concatenate a string of helm references
-          eval "arr=($featuregates)"
+          eval "arr=(${featuregates})"
           len=${#arr[@]}
           cmd="--feature-gates="
           for s in "${arr[@]}"; do
@@ -73,18 +71,15 @@ jobs:
               fi
               cmd+="$s={{- default false .Values.featureGates.$s }}$delim"
           done
-          #  delete existing feature gates command
           yq eval -i 'del(.spec.template.spec.containers.[].args.[] | select(test("--feature-gates")))' ${stubpath}
-          cmd=${cmd} yq -i  'select( .spec.template.spec.containers.[].args += [strenv(cmd)])' ${stubpath}
+          yq -i  'select( .spec.template.spec.containers.[].args += [strenv(cmd)])' ${stubpath}
           cat ${stubpath} | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
           base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           maintainer="${{ env.MAINTAINER }}" owner="${{ env.OWNER }}" yq -i '.|= ({"maintainers": [{"email": strenv(maintainer), "name": strenv(owner) }]} + .)' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
-          # might be unnecessary - image="${{ env.RELEASE_TAG }}"                                   yq -i '(.control.manager.image.tag=strenv(image))'  ${values}
           gatevals=${featurevals} yq -i '(. + {"featureGates": env(gatevals) })' $values
-          # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
 
       - name: Update Helm Docs
