@@ -93,7 +93,7 @@ jobs:
         env:
           DEST: charts
         run: |
-          helm-docs ${{ env.DEST }}
+          helm-docs ${{ env.DEST }}/${{ env.CHARTNAME }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
