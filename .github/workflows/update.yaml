@@ -71,6 +71,7 @@ jobs:
               fi
               cmd+="$s={{- default false .Values.featureGates.$s }}$delim"
           done
+          echo "${cmd}"
           yq eval -i 'del(.spec.template.spec.containers.[].args.[] | select(test("--feature-gates")))' ${stubpath}
           yq -i  'select( .spec.template.spec.containers.[].args += [strenv(cmd)])' ${stubpath}
           cat ${stubpath} | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
