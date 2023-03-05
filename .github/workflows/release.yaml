@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  CHARTNAME: capi
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -58,7 +61,7 @@ jobs:
           rm -rf dist
           mkdir dist
           echo ${{ secrets.REGISTRY_TOKEN }} | helm registry login ghcr.io --username ${{ github.repository_owner }} --password-stdin
-          helm package charts/capi --destination dist
-          helm push dist/capi-*.tgz oci://ghcr.io/fire-ant > .digest
+          helm package charts/${{ env.CHARTNAME }} --destination dist
+          helm push dist/${{ env.CHARTNAME }}-*.tgz oci://ghcr.io/fire-ant > .digest
           cat .digest | awk -F "[, ]+" '/Digest/{print $NF}'
-          cosign sign ghcr.io/fire-ant/capi@$(cat .digest | awk -F "[, ]+" '/Digest/{print $NF}') --yes
+          cosign sign ghcr.io/fire-ant/${{ env.CHARTNAME }}@$(cat .digest | awk -F "[, ]+" '/Digest/{print $NF}') --yes
