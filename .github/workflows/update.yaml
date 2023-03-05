@@ -50,7 +50,7 @@ jobs:
           DEST: charts
           CHART: Chart.yaml
         run: |
-          bash ${GITHUB_WORKSPACE}/scripts/update.sh ${{ env.STUB }} ${{ env.TARGET }} ${{ env.PROVDER }} ${{ env.SECRETREF }} ${{ env.RELEASE_TAG }} ${{ env.CHART }} ${{ env.CHARTNAME }} ${{ env.OWNER }} ${{ env.MAINTAINER }} ${{ env.DEST }}
+          bash ${GITHUB_WORKSPACE}/scripts/update.sh ${{ env.STUB }} ${{ env.TARGET }} ${{ env.PROVIDER }} ${{ env.SECRETREF }} ${{ env.RELEASE_TAG }} ${{ env.CHART }} ${{ env.CHARTNAME }} ${{ env.OWNER }} ${{ env.MAINTAINER }} ${{ env.DEST }}
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
 
       - name: Update Helm Docs
