@@ -68,8 +68,8 @@ jobs:
           kubectl apply -f https://github.com/${{ env.CM_NAME}}/${{ env.CM_NAME}}/releases/download/v${{ env.CM_VERSION }}/${{ env.CM_NAME}}.yaml
           echo "Successfully installed cert-manager ${{ env.CM_VERSION }}."
           cm-verifier
+          kubectl create ns ${{ env.CHART }}-system
 
       - name: Run chart-testing (install)
         run: |
-          kubectl create ns ${{ env.CHART }}-system
           ct install --config ct.yaml
