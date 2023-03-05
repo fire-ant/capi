@@ -8,3 +8,5 @@ namespace: capi-system
 release-label: ct-test
 validate-maintainers: false
 validate-chart-schema: false
+# disable whilst building earlier releases
+check-version-increment: false
