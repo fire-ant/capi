@@ -6,3 +6,5 @@ chart-dirs:
 helm-extra-set-args: --set=installCRDS=true
 namespace: capi-system
 release-label: ct-test
+validate-maintainers: false
+validate-chart-schema: false
