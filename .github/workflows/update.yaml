@@ -50,14 +50,14 @@ jobs:
           DEST: charts
           CHART: Chart.yaml
         run: |
+          mkdir ${{ env.STUB }}
+          mkdir -p ${{ env.DEST }}
+          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
+          rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
           export name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
           export values=${{ env.DEST }}/values.yaml
           export featuregates=$(cat ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml | yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  .string')
           export featurevals=$(cat ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml| yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  {.string:false}')
-          mkdir ${{ env.STUB }}
-          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
-          rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
-          mkdir -p ${{ env.DEST }}
           eval "arr=(${featuregates})"
           len=${#arr[@]}
           cmd="--feature-gates="
