@@ -11,8 +11,8 @@ owner=${8}
 maintainer=${9}
 dest=${10}
 name=$(echo ${target} | sed 's:.*/::')
-values=${dest}/values.yaml
-component=${provider}-components.yml
+values=${dest}/${chartname}/values.yaml
+component=${provider}-components.yaml
 
 mkdir ${stub}
 mkdir -p ${dest}
