@@ -62,6 +62,7 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
 
       - name: Install dependencies (cert-manager)
+        if: steps.list-changed.outputs.changed == 'true'
         shell: bash
         run: |
           echo "Installing  ${{ env.CM_NAME}} - ${{ env.CM_VERSION }} as '${{ env.CM_NAME}}' ..."
