@@ -30,6 +30,11 @@ jobs:
           current_tag="${GITHUB_REF#refs/*/}"
           echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
 
+      - name: Clean cached
+        shell: bash
+        id: chart-tag
+        run: rm -rf /usr/bin/helmify
+
       - name: Install Helmify
         uses: giantswarm/install-binary-action@v1.1.0
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
