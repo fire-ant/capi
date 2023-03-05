@@ -1,21 +1,27 @@
 # capi
 
-![Version: 1.3.3](https://img.shields.io/badge/Version-1.3.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.3](https://img.shields.io/badge/AppVersion-1.3.3-informational?style=flat-square)
+![Version: v1.4.0-beta.1](https://img.shields.io/badge/Version-v1.4.0--beta.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.0-beta.1](https://img.shields.io/badge/AppVersion-v1.4.0--beta.1-informational?style=flat-square)
 
-A Helm Chart for the cluster-api core provider
+A Helm Chart for the kubernetes-sigs/cluster-api
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| chris | <chris@weave.works> |  |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | controllerManager.manager.image.repository | string | `"registry.k8s.io/cluster-api/cluster-api-controller"` |  |
-| controllerManager.manager.image.tag | string | `"v1.3.3"` |  |
+| controllerManager.manager.image.tag | string | `"v1.4.0-beta.1"` |  |
 | controllerManager.replicas | int | `1` |  |
+| featureGates.ClusterResourceSet | bool | `false` |  |
+| featureGates.ClusterTopology | bool | `false` |  |
+| featureGates.MachinePool | bool | `false` |  |
+| featureGates.RuntimeSDK | bool | `false` |  |
 | kubernetesClusterDomain | string | `"cluster.local"` |  |
-| providerArgs.clusterResourceSet | bool | `false` |  |
-| providerArgs.clusterTopology | bool | `false` |  |
-| providerArgs.machinePool | bool | `false` |  |
-| providerArgs.runtimeSDK | bool | `false` |  |
 | webhookService.ports[0].port | int | `443` |  |
 | webhookService.ports[0].targetPort | string | `"webhook-server"` |  |
 | webhookService.type | string | `"ClusterIP"` |  |
