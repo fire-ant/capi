@@ -32,7 +32,7 @@ jobs:
 
       - name: Clean cached
         shell: bash
-        run: rm -rf /usr/bin/helmify
+        run: rm -rf helmify
 
       - name: Install Helmify
         uses: giantswarm/install-binary-action@v1.1.0
