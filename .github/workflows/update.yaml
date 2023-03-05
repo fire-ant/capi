@@ -81,7 +81,7 @@ jobs:
           app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
-          maintainer="${{ env.MAINTAINER }}" owner="${{ env.OWNER }}" yq -i '.|= ({"maintainers": [{"email": strenv(maintainers), "name": strenv(owner) }]} + .)' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
+          maintainer="${{ env.MAINTAINER }}" owner="${{ env.OWNER }}" yq -i '.|= ({"maintainers": [{"email": strenv(maintainer), "name": strenv(owner) }]} + .)' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           image="${3}"                                   yq -i '(.control.manager.image.tag=strenv(image))'  ${values}
           gatevals=${featurevals} yq -i '(. + {"featureGates": env(gatevals) })' $values
           # Update current release
