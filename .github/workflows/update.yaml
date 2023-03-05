@@ -46,19 +46,18 @@ jobs:
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
         env:
           RELEASE_TAG: ${{ steps.chart-tag.outputs.release_tag }}
-          STUB: ".stub"
+          STUB: .stub
           DEST: charts
           CHART: Chart.yaml
         run: |
-          stubpath=${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
+          export name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
+          export values=${{ env.DEST }}/values.yaml
+          export featuregates=$(cat ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml | yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  .string')
+          export featurevals=$(cat ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml| yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  {.string:false}')
           mkdir ${{ env.STUB }}
-          name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
-          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${stubpath}
+          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
           rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
           mkdir -p ${{ env.DEST }}
-          values=${{ env.DEST }}/values.yaml
-          featuregates=$(cat ${stubpath} | yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  .string')
-          featurevals=$(cat ${stubpath}| yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  {.string:false}')
           eval "arr=(${featuregates})"
           len=${#arr[@]}
           cmd="--feature-gates="
@@ -72,9 +71,9 @@ jobs:
               cmd+="$s={{- default false .Values.featureGates.$s }}$delim"
           done
           echo "${cmd}"
-          yq eval -i 'del(.spec.template.spec.containers.[].args.[] | select(test("--feature-gates")))' ${stubpath}
-          yq -i  'select( .spec.template.spec.containers.[].args += [strenv(cmd)])' ${stubpath}
-          cat ${stubpath} | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
+          yq eval -i 'del(.spec.template.spec.containers.[].args.[] | select(test("--feature-gates")))' ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
+          yq -i  'select( .spec.template.spec.containers.[].args += [strenv(cmd)])' ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
+          cat ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
           base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
