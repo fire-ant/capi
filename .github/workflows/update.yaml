@@ -32,7 +32,6 @@ jobs:
 
       - name: Clean cached
         shell: bash
-        id: chart-tag
         run: rm -rf /usr/bin/helmify
 
       - name: Install Helmify
