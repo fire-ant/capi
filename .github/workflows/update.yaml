@@ -18,6 +18,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: mikefarah/yq@v4.31.2
       - uses: freenet-actions/setup-jq@v2
+      - uses: envoy/install-helm-docs@v1.0.0
+        with:
+          version: 1.11.0
 
       - name: Get Latest Component Release tag
         shell: bash
@@ -30,6 +33,7 @@ jobs:
 
       - name: Install Helmify
         uses: giantswarm/install-binary-action@v1.1.0
+        if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
         with:
           download_url: https://github.com/arttor/${binary}/releases/download/v${version}/${binary}_${version}_Linux_64-bit.tar.gz
           tarball_binary_path: ${binary}
@@ -37,7 +41,6 @@ jobs:
           version: "0.3.25"
           smoke_test: "${binary} -version"
 
-        if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
       - name: Update Chart
         shell: bash
         if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
@@ -47,19 +50,51 @@ jobs:
           DEST: charts
           CHART: Chart.yaml
         run: |
+          stubpath=${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
           mkdir ${{ env.STUB }}
           name=$(echo ${{ env.TARGET }} | sed 's:.*/::')
-          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${{ env.STUB }}/${{ env.PROVIDER }}-components.yaml
+          wget -q https://github.com/${{ env.TARGET }}/releases/download/${RELEASE_TAG}/${{ env.PROVIDER }}-components.yaml -O ${stubpath}
           rm -rf ${{ env.DEST }}/${{ env.CHARTNAME }}
           mkdir -p ${{ env.DEST }}
-          cat ${{ env.STUB }}/* | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
+          values=${{ env.DEST }}/values.yaml
+          # the feature gates present in the deployment
+          featuregates=$(cat ${stubpath} | yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  .string')
+          featurevals=$(cat ${stubpath}| yq 'select( .kind == "Deployment") | .spec.template.spec.containers.[].args.[] | select(test("feature")) | match("(gates=)(.*?)[=]|[,](.*?)[=]" ; "g") | .captures  | del(.[0]) | .[] | select( .string !=null) |  {.string:false}')
+          # create an array and concatenate a string of helm references
+          eval "arr=($featuregates)"
+          len=${#arr[@]}
+          cmd="--feature-gates="
+          for s in "${arr[@]}"; do
+              ((counter++))
+              if [[ $counter = $len ]]; then
+                delim="";
+              else
+                delim=",";
+              fi
+              cmd+="$s={{- default false .Values.featureGates.$s }}$delim"
+          done
+          #  delete existing feature gates command
+          yq eval -i 'del(.spec.template.spec.containers.[].args.[] | select(test("--feature-gates")))' ${stubpath}
+          cmd="${cmd}" yq -i  'select( .spec.template.spec.containers.[].args += [strenv(cmd)])' ${stubpath}
+          cat ${stubpath} | secretref="${{ env.SECRETREF }}" yq 'select(.metadata.name !=env(secretref))' | helmify -crd-dir ${{ env.DEST }}/${{ env.CHARTNAME }}
           base="${{ env.RELEASE_TAG }}"                                   yq -i '(.version=strenv(base))'   ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           app="${{ env.RELEASE_TAG }}"                                     yq -i '(.appVersion=strenv(app))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           chartname="${{ env.CHARTNAME }}"                              yq -i '(.name=strenv(chartname))' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           desc="A Helm Chart for the ${{ env.TARGET }}" yq -i '(.description=strenv(desc))'  ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
           maintainer="${{ env.MAINTAINER }}" owner="${{ env.OWNER }}" yq -i '.|= ({"maintainers": [{"email": strenv(maintainers), "name": strenv(owner) }]} + .)' ${{ env.DEST }}/${{ env.CHARTNAME }}/${{ env.CHART }}
+          image="${3}"                                   yq -i '(.control.manager.image.tag=strenv(image))'  ${values}
+          gatevals=${featurevals} yq -i '(. + {"featureGates": env(gatevals) })' $values
           # Update current release
           echo ${{ steps.chart-tag.outputs.release_tag }} > chart-tag.version
+
+      - name: Update Helm Docs
+        shell: bash
+        if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
+        env:
+          DEST: charts
+        run: |
+          helm-docs ${{ env.DEST }}
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
