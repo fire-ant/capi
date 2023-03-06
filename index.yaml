@@ -43,6 +43,19 @@ entries:
     - https://github.com/fire-ant/capi/releases/download/capi-v1.4.0-beta.1/capi-v1.4.0-beta.1.tgz
     version: v1.4.0-beta.1
   - apiVersion: v2
+    appVersion: v1.4.0-beta.1
+    created: "2023-03-06T10:38:41.251964802Z"
+    description: A Helm Chart for the kubernetes-sigs/cluster-api
+    digest: 39c03b9841fe273c34e35ca9d3e41f9bc07b2d19852415b4599bd6207f52309f
+    maintainers:
+    - email: chris@weave.works
+      name: chris
+    name: capi
+    type: application
+    urls:
+    - https://github.com/fire-ant/capi/releases/download/capi-v1.4.0-beta.1/capi-v1.4.0-beta.1.tgz
+    version: v1.4.0-beta.1
+  - apiVersion: v2
     appVersion: v1.3.4
     created: "2023-03-05T23:44:26.864003544Z"
     description: A Helm Chart for the kubernetes-sigs/cluster-api
@@ -612,4 +625,4 @@ entries:
     urls:
     - https://github.com/helm/charts-repo-actions-demo/releases/download/example-v2-0.2.2/example-v2-0.2.2.tgz
     version: 0.2.2
-generated: "2023-03-05T23:44:26.864056644Z"
+generated: "2023-03-06T10:38:41.252051003Z"
