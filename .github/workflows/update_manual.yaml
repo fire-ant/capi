@@ -72,7 +72,9 @@ jobs:
       - name: Clean cached
         shell: bash
         run: rm -rf helmify
+
       - name: Create Pull Request
+        if: steps.chart-tag.outputs.current_tag != steps.chart-tag.outputs.release_tag
         uses: peter-evans/create-pull-request@v4
         with:
           commit-message: Update  Helm Chart to ${{ steps.chart-tag.outputs.release_tag }}
@@ -84,6 +86,6 @@ jobs:
 
             [2]: https://github.com/peter-evans/create-pull-request
           labels: dependencies, automated pr
-          branch: chart-tag-updates
+          branch: update/${{ steps.chart-tag.outputs.release_tag }}
           token: ${{ secrets.UPDATE_TOKEN }}
           delete-branch: true
