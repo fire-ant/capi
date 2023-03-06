@@ -86,6 +86,6 @@ jobs:
 
             [2]: https://github.com/peter-evans/create-pull-request
           labels: dependencies, automated pr
-          branch: update/${{ steps.chart-tag.outputs.release_tag }}
+          branch: update/${{ env.CHARTNAME }}-${{ steps.chart-tag.outputs.release_tag }}
           token: ${{ secrets.UPDATE_TOKEN }}
           delete-branch: true
