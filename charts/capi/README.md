@@ -1,6 +1,6 @@
 # capi
 
-![Version: v1.4.0-beta.2](https://img.shields.io/badge/Version-v1.4.0--beta.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.0-beta.2](https://img.shields.io/badge/AppVersion-v1.4.0--beta.2-informational?style=flat-square)
+![Version: v1.6.2](https://img.shields.io/badge/Version-v1.6.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.2](https://img.shields.io/badge/AppVersion-v1.6.2-informational?style=flat-square)
 
 A Helm Chart for the kubernetes-sigs/cluster-api
 
@@ -15,11 +15,12 @@ A Helm Chart for the kubernetes-sigs/cluster-api
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | controllerManager.manager.image.repository | string | `"registry.k8s.io/cluster-api/cluster-api-controller"` |  |
-| controllerManager.manager.image.tag | string | `"v1.4.0-beta.2"` |  |
+| controllerManager.manager.image.tag | string | `"v1.6.2"` |  |
 | controllerManager.replicas | int | `1` |  |
 | featureGates.ClusterResourceSet | bool | `false` |  |
 | featureGates.ClusterTopology | bool | `false` |  |
 | featureGates.MachinePool | bool | `false` |  |
+| featureGates.MachineSetPreflightChecks | bool | `false` |  |
 | featureGates.RuntimeSDK | bool | `false` |  |
 | kubernetesClusterDomain | string | `"cluster.local"` |  |
 | webhookService.ports[0].port | int | `443` |  |
